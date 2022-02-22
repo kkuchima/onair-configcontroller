@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: GKEPrivateClusterV1
+metadata:
+  name: privatecluster-required
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups:
+      - container.cnrm.cloud.google.com
+      kinds:
+      - ContainerCluster
+    namespaces:
+    - config-control

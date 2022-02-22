@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: VPCFlowLogV1
+metadata:
+  name: vpcflowlog-required
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups:
+      - compute.cnrm.cloud.google.com
+      kinds:
+      - ComputeSubnetwork
+    namespaces:
+    - config-control

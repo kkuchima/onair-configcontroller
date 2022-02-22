@@ -1,0 +1,19 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: gkeworkloadidentityv1
+spec:
+  crd:
+    spec:
+      names:
+        kind: GKEWorkloadIdentityV1
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package gkeworkloadidentityv1
+
+      violation[{"msg": msg}] {
+          clusterName := input.review.object.metadata.name
+          not input.review.object.spec.workloadIdentityConfig
+          msg := sprintf("Workiad Identity configuration is required: cluster name <%v>", [clusterName])
+      }

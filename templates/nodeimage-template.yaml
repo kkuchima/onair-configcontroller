@@ -1,0 +1,40 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: gkenodeimagev1
+spec:
+  crd:
+    spec:
+      names:
+        kind: GKENodeImageV1
+      validation:
+        openAPIV3Schema:
+          properties:
+            images:
+              type: array
+              items:
+                type: string
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package gkenodeimagev1
+
+      allowedNodeImage(reviewImage) {
+          images := input.parameters.images
+          satisfied := [ good | image = images[_]
+                                good = lower(image) == lower(reviewImage)]
+          any(satisfied)
+      }
+
+      violation[{"msg": msg}] {
+          clusterName := input.review.object.spec.clusterRef.name
+          nodeImage := input.review.object.spec.nodeConfig.imageType
+          not allowedNodeImage(nodeImage)
+          msg := sprintf("GKE Cluster <%v> uses a disallowed node image <%v>, allowed node images are %v", [clusterName, nodeImage, input.parameters.images])
+      }
+
+      violation[{"msg": msg}] {
+          clusterName := input.review.object.spec.clusterRef.name
+          not input.review.object.spec.nodeConfig.imageType
+          msg := sprintf("No Node Image configuration provided: cluster name <%v>", [clusterName])
+      }

@@ -1,0 +1,35 @@
+apiVersion: container.cnrm.cloud.google.com/v1beta1
+kind: ContainerNodePool
+metadata:
+  name: ubuntu-nodepool
+  namespace: config-control
+spec:
+  location: asia-northeast2-a
+  autoscaling:
+    minNodeCount: 2
+    maxNodeCount: 3
+  nodeConfig:
+    machineType: n1-standard-1
+    imageType: ubuntu
+  management:
+    autoRepair: true
+    autoUpgrade: true
+  nodeCount: 2
+  clusterRef:
+    name: default-cluster
+
+---
+apiVersion: container.cnrm.cloud.google.com/v1beta1
+kind: ContainerCluster
+metadata:
+  annotations:
+    cnrm.cloud.google.com/remove-default-node-pool: "true"
+  name: default-cluster
+  namespace: config-control
+spec:
+  location: asia-northeast2-a
+  initialNodeCount: 1
+  networkRef:
+    name: demo-vpc
+  subnetworkRef:
+    name: subnet-osaka

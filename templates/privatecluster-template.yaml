@@ -1,0 +1,25 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: gkeprivateclusterv1
+spec:
+  crd:
+    spec:
+      names:
+        kind: GKEPrivateClusterV1
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package gkeprivateclusterv1
+
+      violation[{"msg": msg}] {
+          clusterName := input.review.object.metadata.name
+          not input.review.object.spec.privateClusterConfig.enablePrivateEndpoint
+          msg := sprintf("Private Endpoint is not enabled: cluster name <%v>", [clusterName])
+      }
+
+      violation[{"msg": msg}] {
+          clusterName := input.review.object.metadata.name
+          not input.review.object.spec.privateClusterConfig.enablePrivateNodes
+          msg := sprintf("Private Node configuration is not enabled: cluster name <%v>", [clusterName])
+      }
